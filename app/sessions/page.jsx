@@ -1,3 +1,8 @@
-export default function CalendarPage() {
-  return <div style={{color:"white", padding:40}}><h1>Календарь</h1></div>
+export default function SessionsPage() {
+  return (
+    <div style={{ color: "white", padding: 40 }}>
+      <h1>Сессии</h1>
+      <p>Статистика по торговым сессиям.</p>
+    </div>
+  )
 }
