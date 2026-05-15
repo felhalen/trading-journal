@@ -30,16 +30,22 @@ export default function TradesPage() {
       <table style={{ width: '100%', marginTop: 20, borderCollapse: 'collapse' }}>
         <thead>
           <tr>
-            <th>Символ</th>
-            <th>Сторона</th>
-            <th>Entry</th>
-            <th>SL</th>
-            <th>TP</th>
-            <th>PnL</th>
-            <th>RR</th>
-            <th>Сетап</th>
-            <th>Ошибка</th>
-            <th>Эмоция</th>
+            <th>Источник</th>
+<th>Ticket</th>
+<th>Символ</th>
+<th>Сторона</th>
+<th>Lot</th>
+<th>Entry</th>
+<th>Exit</th>
+<th>SL</th>
+<th>TP</th>
+<th>PnL</th>
+<th>Комиссия</th>
+<th>Swap</th>
+<th>RR</th>
+<th>Сетап</th>
+<th>Ошибка</th>
+<th>Эмоция</th>
           </tr>
         </thead>
 
