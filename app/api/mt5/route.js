@@ -3,7 +3,20 @@ import { createClient } from '@supabase/supabase-js'
 
 export async function POST(req) {
   try {
-    const body = await req.json()
+    let raw = await req.text()
+
+    raw = raw.replace(/\0/g, '').trim()
+
+    const first = raw.indexOf('{')
+    const last = raw.lastIndexOf('}')
+
+    if (first === -1 || last === -1) {
+      return NextResponse.json({ error: 'Invalid JSON body', raw }, { status: 400 })
+    }
+
+    raw = raw.slice(first, last + 1)
+
+    const body = JSON.parse(raw)
 
     if (body.secret !== process.env.WEBHOOK_SECRET) {
       return NextResponse.json({ error: 'Wrong secret' }, { status: 401 })
@@ -15,6 +28,8 @@ export async function POST(req) {
     )
 
     const trade = {
+      source: 'mt5',
+      mt5_ticket: String(body.ticket || ''),
       symbol: body.symbol || 'UNKNOWN',
       side: String(body.type || body.side || 'unknown').toLowerCase(),
       entry_price: Number(body.open_price || body.entry || 0),
@@ -23,12 +38,13 @@ export async function POST(req) {
       commission: Number(body.commission || 0),
       swap: Number(body.swap || 0),
       status: body.status || 'closed',
-      notes: body.comment || `MT5 ticket: ${body.ticket || ''}`
+      setup: 'MT5',
+      notes: body.comment || 'MT5 trade'
     }
 
     const { data, error } = await supabase
       .from('trades')
-      .insert(trade)
+      .upsert(trade, { onConflict: 'mt5_ticket' })
       .select()
       .single()
 
