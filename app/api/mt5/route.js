@@ -42,11 +42,11 @@ export async function POST(req) {
       notes: body.comment || 'MT5 trade'
     }
 
-    const { data, error } = await supabase
-      .from('trades')
-      .upsert(trade, { onConflict: 'mt5_ticket' })
-      .select()
-      .single()
+   const { data, error } = await supabase
+    .from('trades')
+    .insert(trade)
+    .select()
+    .single()
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
