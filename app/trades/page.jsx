@@ -8,6 +8,7 @@ export default function TradesPage() {
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState(null)
   const [editData, setEditData] = useState({})
+  const [analysis, setAnalysis] = useState(null)
 
   async function loadTrades() {
     const { data, error } = await supabase
@@ -33,6 +34,30 @@ export default function TradesPage() {
     }
 
     loadTrades()
+  }
+
+  async function analyzeTrade(trade) {
+    setAnalysis({
+      loading: true,
+      trade,
+      result: null
+    })
+
+    const res = await fetch('/api/ai-analysis', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ trade })
+    })
+
+    const data = await res.json()
+
+    setAnalysis({
+      loading: false,
+      trade,
+      result: data
+    })
   }
 
   function startEdit(trade) {
@@ -79,6 +104,54 @@ export default function TradesPage() {
   return (
     <div style={{ color: 'white', padding: 40 }}>
       <h1>Все сделки</h1>
+
+      {analysis && (
+        <div style={analysisBox}>
+          <button onClick={() => setAnalysis(null)} style={closeBtn}>×</button>
+
+          <h2>AI-анализ сделки</h2>
+
+          {analysis.loading ? (
+            <p>Анализирую сделку...</p>
+          ) : (
+            <>
+              <p>
+                <b>Сделка:</b> {analysis.trade.symbol} / {analysis.trade.side} / PnL: {analysis.trade.pnl}
+              </p>
+
+              <p>
+                <b>Оценка дисциплины:</b> {analysis.result.score}/100
+              </p>
+
+              <p>
+                <b>Вывод:</b> {analysis.result.summary}
+              </p>
+
+              <h3>Проблемы</h3>
+              {analysis.result.issues?.length ? (
+                <ul>
+                  {analysis.result.issues.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p>Критичных проблем не найдено.</p>
+              )}
+
+              <h3>Рекомендации</h3>
+              {analysis.result.recommendations?.length ? (
+                <ul>
+                  {analysis.result.recommendations.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p>Рекомендаций нет.</p>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       {loading && <p>Загрузка...</p>}
 
@@ -198,6 +271,7 @@ export default function TradesPage() {
                   </>
                 ) : (
                   <>
+                    <button onClick={() => analyzeTrade(trade)} style={analysisBtn}>Анализ</button>
                     <button onClick={() => startEdit(trade)} style={editBtn}>Редактировать</button>
                     <button onClick={() => deleteTrade(trade.id)} style={deleteBtn}>Удалить</button>
                   </>
@@ -218,6 +292,42 @@ const inputStyle = {
   border: '1px solid #334155',
   borderRadius: 6,
   padding: 6
+}
+
+const analysisBox = {
+  position: 'fixed',
+  top: 80,
+  right: 40,
+  width: 420,
+  maxHeight: '75vh',
+  overflowY: 'auto',
+  background: '#0f172a',
+  border: '1px solid #334155',
+  borderRadius: 16,
+  padding: 24,
+  zIndex: 1000,
+  boxShadow: '0 20px 60px rgba(0,0,0,.4)'
+}
+
+const closeBtn = {
+  position: 'absolute',
+  top: 12,
+  right: 16,
+  background: 'transparent',
+  color: 'white',
+  border: 'none',
+  fontSize: 24,
+  cursor: 'pointer'
+}
+
+const analysisBtn = {
+  background: '#0ea5e9',
+  color: 'white',
+  border: 'none',
+  padding: '7px 10px',
+  borderRadius: 8,
+  cursor: 'pointer',
+  marginRight: 6
 }
 
 const editBtn = {
