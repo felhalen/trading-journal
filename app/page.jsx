@@ -1,4 +1,4 @@
-'use client'
+'use client'import Link from "next/link"
 
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
@@ -15,16 +15,37 @@ function Sidebar() {
   return <aside className="sidebar">
     <div className="logo">TRADING JOURNAL</div>
     <div className="author">Pro версия</div>
-    <nav>
-      <b><Home size={18}/> Дашборд</b>
-      <span><CalendarDays size={18}/> Календарь</span>
-      <span><PieChart size={18}/> Сессии</span>
-      <span><BarChart3 size={18}/> Дни недели</span>
-      <span><Layers size={18}/> Сетапы</span>
-      <span><AlertTriangle size={18}/> Ошибки</span>
-      <span><Activity size={18}/> Equity Curve</span>
-      <span><ClipboardList size={18}/> Все сделки</span>
-    </nav>
+   <nav>
+  <Link href="/"><b><Home size={18}/> Дашборд</b></Link>
+
+  <Link href="/calendar">
+    <span><CalendarDays size={18}/> Календарь</span>
+  </Link>
+
+  <Link href="/sessions">
+    <span><PieChart size={18}/> Сессии</span>
+  </Link>
+
+  <Link href="/weekdays">
+    <span><BarChart3 size={18}/> Дни недели</span>
+  </Link>
+
+  <Link href="/setups">
+    <span><Layers size={18}/> Сетапы</span>
+  </Link>
+
+  <Link href="/mistakes">
+    <span><AlertTriangle size={18}/> Ошибки</span>
+  </Link>
+
+  <Link href="/equity">
+    <span><Activity size={18}/> Equity Curve</span>
+  </Link>
+
+  <Link href="/trades">
+    <span><ClipboardList size={18}/> Все сделки</span>
+  </Link>
+</nav>
   </aside>
 }
 
