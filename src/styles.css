@@ -1,85 +1,83 @@
 
-*{
-  box-sizing:border-box;
-  font-family:Inter,Arial,sans-serif;
-}
-body{
-  background:#050816;
-  color:white;
-}
-.container{
-  display:flex;
-  min-height:100vh;
-}
-.sidebar{
-  width:240px;
-  background:#0b1020;
-  border-right:1px solid rgba(255,255,255,.08);
-  padding:24px;
-}
-.logo{
-  color:#8b5cf6;
-  font-size:24px;
-  font-weight:800;
-}
-.menu{
-  margin-top:30px;
-}
-.menu-item{
-  background:#7c3aed;
-  padding:14px;
-  border-radius:12px;
-  margin-bottom:12px;
-  font-weight:600;
-}
-.content{
-  flex:1;
-  padding:24px;
-}
-.top-grid{
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:16px;
-}
-.card{
-  background:#0b1020;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:18px;
-  padding:20px;
-}
-.big-grid{
-  margin-top:20px;
-  display:grid;
-  grid-template-columns:2fr 1fr 1fr;
-  gap:20px;
-}
-.chart{
-  height:280px;
-}
-.calendar{
-  margin-top:30px;
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:10px;
-}
-.day{
-  background:#0b1020;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:14px;
-  height:110px;
-  padding:12px;
-}
-.title{
-  font-size:30px;
-  font-weight:800;
-  margin-bottom:20px;
-}
-.small{
-  color:#a1a1aa;
-  font-size:14px;
-}
-.value{
-  font-size:28px;
-  font-weight:800;
-  margin-top:10px;
-}
+*{box-sizing:border-box}
+body{margin:0;background:#05080f;color:#f7f7fb;font-family:Inter,Segoe UI,Arial,sans-serif}
+.app{display:flex;min-height:100vh;background:
+radial-gradient(circle at 70% -10%,rgba(124,58,237,.13),transparent 32%),
+linear-gradient(180deg,#05080f,#070b13)}
+.sidebar{position:fixed;left:0;top:0;width:212px;height:100vh;background:rgba(5,8,15,.84);border-right:1px solid rgba(255,255,255,.09);padding:24px 18px;backdrop-filter:blur(16px)}
+.logo{font-weight:900;letter-spacing:.5px;color:#8b5cf6;font-size:18px}
+.author{font-size:13px;color:#b7bece;margin-top:8px}
+.navBlock{margin-top:30px;display:grid;gap:10px}
+.navBlock+.navBlock{margin-top:10px}
+.navItem{height:44px;border-radius:8px;display:flex;align-items:center;gap:12px;padding:0 12px;color:#c5cbda;font-weight:700;font-size:13px}
+.navItem.active{background:linear-gradient(135deg,#7c3aed,#9333ea);color:white;box-shadow:0 10px 30px rgba(124,58,237,.23)}
+.sectionName{text-transform:uppercase;color:#697084;font-size:11px;font-weight:800;margin-top:28px}
+.currentMonth{position:absolute;bottom:24px;left:18px;right:18px;border-radius:12px;background:rgba(255,255,255,.055);padding:14px;color:#cbd2df;font-size:12px}
+.currentMonth b{display:block;color:white;margin-top:4px}
+.currentMonth svg{position:absolute;right:13px;bottom:16px}
+main{width:100%;padding:26px 22px 38px 238px}
+.pageHeader,.calendarHeader{display:flex;align-items:center;justify-content:space-between;gap:16px}
+h1{font-size:24px;margin:0 0 20px;font-weight:900}
+h2{font-size:24px;margin:0;font-weight:900}
+h3{margin:0;font-size:15px}
+button{border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.055);color:white;border-radius:8px;height:40px;padding:0 14px;font-weight:800;cursor:pointer}
+.monthControls,.calendarTools,.filters{display:flex;gap:10px;align-items:center}
+.monthBtn{min-width:170px;display:flex;align-items:center;justify-content:center;gap:10px}
+.statsGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:13px;margin-top:10px}
+.statCard,.panel{background:linear-gradient(180deg,rgba(18,23,34,.86),rgba(12,17,27,.86));border:1px solid rgba(255,255,255,.09);border-radius:9px;box-shadow:0 18px 50px rgba(0,0,0,.23)}
+.statCard{height:92px;padding:16px;display:flex;justify-content:space-between;gap:8px}
+.statTitle,.statSub{color:#c7cedd;font-size:12px}
+.statValue{font-size:20px;font-weight:900;letter-spacing:3px;margin:12px 0 8px}
+.statIcon{width:36px;height:36px;background:rgba(124,58,237,.21);color:#8b5cf6;border-radius:9px;display:grid;place-items:center}
+.chartsGrid{display:grid;grid-template-columns:1.25fr .95fr 1.15fr;gap:15px;margin-top:16px}
+.panel{padding:16px}
+.pnlPanel{grid-column:span 1}
+.panelHeader{display:flex;align-items:center;justify-content:space-between}
+.smallSelect{height:34px}
+.chartBox{height:168px;margin-top:15px}
+.chartBox.small{height:170px}
+.sessionWrap{display:flex;align-items:center;margin-top:10px}
+.legend{display:grid;gap:15px;font-size:13px;color:#dbe0ea}
+.legend div{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.legend span{width:12px;height:12px;border-radius:50%;display:inline-block}
+.legend b{margin-left:20px}
+.tablePanel table{width:100%;border-collapse:collapse;margin-top:14px;font-size:12px;color:#d3d8e5}
+.tablePanel th{text-align:left;color:#8991a4;font-weight:800;padding-bottom:10px}
+.tablePanel td{border-top:1px solid rgba(255,255,255,.06);padding:9px 0}
+.linkBtn{display:block;margin:10px auto 0;background:transparent;border:0;color:#b56cff}
+.quickPanel textarea{width:100%;height:82px;margin-top:14px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07);border-radius:8px;color:white;padding:14px;resize:none}
+.purpleBtn{background:linear-gradient(135deg,#7c3aed,#9333ea);height:34px;display:flex;align-items:center;gap:7px}
+.outlineBtn{width:100%;background:transparent}
+.orLine{display:flex;align-items:center;gap:16px;color:#858da0;font-size:12px;margin:14px 0}
+.orLine span{height:1px;background:rgba(255,255,255,.08);flex:1}
+.calendarSection{border-top:3px solid rgba(255,255,255,.92);margin:22px -22px 0;padding:24px 22px 0}
+.calendarHeader{margin-bottom:15px}
+.calendarLayout{display:grid;grid-template-columns:1.5fr 1.05fr;gap:22px}
+.calendarPanel,.dayDetails{background:rgba(10,15,24,.72);border:1px solid rgba(255,255,255,.08);border-radius:8px}
+.weekNames{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid rgba(255,255,255,.08)}
+.weekNames b{padding:12px 18px;color:#cbd2df;font-size:13px}
+.calendarGrid{display:grid;grid-template-columns:repeat(5,1fr)}
+.dayCell{height:89px;border-right:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);padding:12px 18px}
+.dayCell strong{display:block;font-size:18px;margin-bottom:25px}
+.dayCell.selected{box-shadow:inset 0 0 0 2px #7c3aed;background:rgba(124,58,237,.05)}
+.mutedDay{color:#4c5363}
+.stars{font-weight:900;letter-spacing:1.6px;font-size:12px}
+.stars.win{color:#36d486}.stars.loss{color:#ff4d5d}.stars.neutral{color:#e5e7eb}.stars.muted{color:#3f4654}
+.calendarLegend{display:flex;gap:26px;padding:14px 18px;font-size:13px;color:#cbd2df}
+.calendarLegend i{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:9px}
+.greenDot{background:#36d486}.redDot{background:#ff4d5d}.whiteDot{background:#e5e7eb}
+.dayDetails{padding:16px}
+.detailsHeader,.tradesHeader{display:flex;justify-content:space-between;align-items:center}
+.detailsHeader button{width:34px;height:34px;padding:0}
+.detailsStats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0 22px}
+.detailsStats div{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:14px}
+.detailsStats span{display:block;color:#c3cad7;font-size:12px;margin-bottom:12px}
+.tradeList{display:grid;gap:10px;margin-top:14px}
+.tradeItem{position:relative;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px}
+.tradeItem div{font-size:13px}.tradeItem em{font-style:normal;background:rgba(255,255,255,.08);padding:4px 7px;border-radius:6px;margin-left:8px;color:#cbd2df}
+.tradeItem>span{position:absolute;right:14px;top:13px;color:#8f97a8;font-size:12px}
+.tradeItem p{margin:8px 0 0;color:#c3cad7;font-size:12px}
+.tradeItem .stars{position:absolute;right:14px;bottom:12px}
+.notesBtn{margin-top:16px}
+.noteText{color:#c3cad7;font-size:13px}
+@media(max-width:1200px){.statsGrid{grid-template-columns:repeat(3,1fr)}.chartsGrid,.calendarLayout{grid-template-columns:1fr}.sidebar{position:relative;width:100%;height:auto}.app{display:block}main{padding:22px}.currentMonth{display:none}}
