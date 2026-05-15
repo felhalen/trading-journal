@@ -52,18 +52,24 @@ export default function TradesPage() {
         <tbody>
           {trades.map((trade) => (
             <tr key={trade.id}>
-              <td>{trade.symbol}</td>
-              <td>{trade.side}</td>
-              <td>{trade.entry_price}</td>
-              <td>{trade.stop_loss}</td>
-              <td>{trade.take_profit}</td>
-              <td style={{ color: Number(trade.pnl) >= 0 ? '#22c55e' : '#ef4444' }}>
-                {trade.pnl}
-              </td>
-              <td>{trade.rr}</td>
-              <td>{trade.setup}</td>
-              <td>{trade.mistake || '-'}</td>
-              <td>{trade.emotion_before || '-'}</td>
+              <td>{trade.source || 'manual'}</td>
+<td>{trade.mt5_ticket || '-'}</td>
+<td>{trade.symbol}</td>
+<td>{trade.side}</td>
+<td>{trade.lot || '-'}</td>
+<td>{trade.entry_price}</td>
+<td>{trade.exit_price || '-'}</td>
+<td>{trade.stop_loss || '-'}</td>
+<td>{trade.take_profit || '-'}</td>
+<td style={{ color: Number(trade.pnl) >= 0 ? '#22c55e' : '#ef4444' }}>
+  {trade.pnl}
+</td>
+<td>{trade.commission || 0}</td>
+<td>{trade.swap || 0}</td>
+<td>{trade.rr || '-'}</td>
+<td>{trade.setup || '-'}</td>
+<td>{trade.mistake || '-'}</td>
+<td>{trade.emotion_before || '-'}</td>
             </tr>
           ))}
         </tbody>
