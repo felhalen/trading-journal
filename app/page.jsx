@@ -1,21 +1,15 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { buildStats, calcRR } from '@/lib/analytics'
 import {
   Home, CalendarDays, BarChart3, PieChart, Layers, AlertTriangle, Activity,
-  ClipboardList, Plus, Upload, Download, Brain, Cloud, Lock, Camera
+  ClipboardList, Plus, Download, Brain, Cloud, Lock
 } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RPieChart, Pie, Cell } from 'recharts'
 import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
-
-const demoTrades = [
-  { symbol:'EURUSD', side:'long', pnl:120, setup:'Breakout', mistake:'', emotion_before:'спокойно', opened_at:'2025-05-01', session:'Лондон', entry_price:1.12, stop_loss:1.11, take_profit:1.14 },
-  { symbol:'XAUUSD', side:'short', pnl:-70, setup:'Reversal', mistake:'ранний вход', emotion_before:'спешка', opened_at:'2025-05-02', session:'Нью-Йорк', entry_price:2340, stop_loss:2350, take_profit:2320 },
-  { symbol:'GBPUSD', side:'long', pnl:210, setup:'Trend', mistake:'', emotion_before:'уверенно', opened_at:'2025-05-03', session:'Лондон', entry_price:1.25, stop_loss:1.245, take_profit:1.265 },
-]
 
 function Sidebar() {
   return <aside className="sidebar">
@@ -39,43 +33,146 @@ function Stat({ title, value }) {
 }
 
 export default function App() {
-  const [trades, setTrades] = useState(demoTrades)
+  const [trades, setTrades] = useState([])
+  const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
-  const [newTrade, setNewTrade] = useState({ symbol:'', side:'long', entry_price:'', stop_loss:'', take_profit:'', pnl:'', setup:'', mistake:'', emotion_before:'', notes:'' })
+  const [newTrade, setNewTrade] = useState({
+    symbol: '',
+    side: 'long',
+    entry_price: '',
+    stop_loss: '',
+    take_profit: '',
+    pnl: '',
+    setup: '',
+    mistake: '',
+    emotion_before: '',
+    emotion_after: '',
+    notes: ''
+  })
   const [ai, setAi] = useState(null)
   const [authEmail, setAuthEmail] = useState('')
+  const [statusMessage, setStatusMessage] = useState('')
+
+  useEffect(() => {
+    loadTrades()
+  }, [])
+
+  async function loadTrades() {
+    setLoading(true)
+
+    if (!supabase) {
+      setStatusMessage('Supabase ENV не найдены')
+      setLoading(false)
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('trades')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      setStatusMessage(`Ошибка загрузки: ${error.message}`)
+    } else {
+      setTrades(data || [])
+      setStatusMessage(`Загружено сделок: ${(data || []).length}`)
+    }
+
+    setLoading(false)
+  }
 
   const visibleTrades = useMemo(() => {
-    return trades.filter(t => !filter || [t.symbol,t.setup,t.mistake,t.session].join(' ').toLowerCase().includes(filter.toLowerCase()))
+    return trades.filter(t => !filter || [t.symbol, t.setup, t.mistake, t.emotion_before, t.side]
+      .join(' ')
+      .toLowerCase()
+      .includes(filter.toLowerCase()))
   }, [trades, filter])
 
   const stats = useMemo(() => buildStats(visibleTrades), [visibleTrades])
 
-  const weekData = [
-    { name:'Пн', pnl:120 }, { name:'Вт', pnl:-70 }, { name:'Ср', pnl:210 }, { name:'Чт', pnl:85 }, { name:'Пт', pnl:160 }
-  ]
+  const weekData = useMemo(() => {
+    const map = { 1: 'Пн', 2: 'Вт', 3: 'Ср', 4: 'Чт', 5: 'Пт' }
+    return Object.entries(map).map(([dayNum, name]) => {
+      const pnl = visibleTrades
+        .filter(t => new Date(t.created_at || t.opened_at).getDay() === Number(dayNum))
+        .reduce((sum, t) => sum + Number(t.pnl || 0), 0)
+      return { name, pnl }
+    })
+  }, [visibleTrades])
 
   const sessionData = [
-    { name:'Азия', value:22 }, { name:'Франкфурт', value:18 }, { name:'Лондон', value:38 }, { name:'Нью-Йорк', value:22 }
+    { name:'Азия', value:22 },
+    { name:'Франкфурт', value:18 },
+    { name:'Лондон', value:38 },
+    { name:'Нью-Йорк', value:22 }
   ]
 
   async function addTrade() {
+    if (!supabase) {
+      alert('Supabase не подключен. Проверь ENV переменные в Vercel.')
+      return
+    }
+
+    const entry = Number(newTrade.entry_price || 0)
+    const sl = Number(newTrade.stop_loss || 0)
+    const tp = Number(newTrade.take_profit || 0)
+
     const trade = {
-      ...newTrade,
+      symbol: newTrade.symbol.trim().toUpperCase(),
+      side: newTrade.side,
+      entry_price: entry,
+      stop_loss: sl,
+      take_profit: tp,
       pnl: Number(newTrade.pnl || 0),
-      entry_price: Number(newTrade.entry_price || 0),
-      stop_loss: Number(newTrade.stop_loss || 0),
-      take_profit: Number(newTrade.take_profit || 0),
-      opened_at: new Date().toISOString(),
-      source:'manual'
+      setup: newTrade.setup,
+      mistake: newTrade.mistake,
+      emotion_before: newTrade.emotion_before,
+      emotion_after: newTrade.emotion_after,
+      rr: calcRR(entry, sl, tp),
+      notes: newTrade.notes
     }
 
-    if (supabase) {
-      await supabase.from('trades').insert(trade)
+    if (!trade.symbol) {
+      alert('Заполни symbol')
+      return
     }
 
-    setTrades([trade, ...trades])
-    setNewTrade({ symbol:'', side:'long', entry_price:'', stop_loss:'', take_profit:'', pnl:'', setup:'', mistake:'', emotion_before:'', notes:'' })
+    const { data, error } = await supabase
+      .from('trades')
+      .insert(trade)
+      .select()
+      .single()
+
+    if (error) {
+      alert(`Ошибка сохранения: ${error.message}`)
+      return
+    }
+
+    setTrades([data, ...trades])
+    setStatusMessage('Сделка сохранена в Supabase')
+    setNewTrade({
+      symbol: '',
+      side: 'long',
+      entry_price: '',
+      stop_loss: '',
+      take_profit: '',
+      pnl: '',
+      setup: '',
+      mistake: '',
+      emotion_before: '',
+      emotion_after: '',
+      notes: ''
+    })
+  }
+
+  async function deleteTrade(id) {
+    if (!confirm('Удалить сделку?')) return
+    const { error } = await supabase.from('trades').delete().eq('id', id)
+    if (error) {
+      alert(`Ошибка удаления: ${error.message}`)
+      return
+    }
+    setTrades(trades.filter(t => t.id !== id))
   }
 
   async function login() {
@@ -85,7 +182,11 @@ export default function App() {
   }
 
   async function analyzeTrade(trade) {
-    const res = await fetch('/api/ai-analysis', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ trade }) })
+    const res = await fetch('/api/ai-analysis', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ trade })
+    })
     setAi(await res.json())
   }
 
@@ -114,9 +215,9 @@ export default function App() {
           <p>MT5 + TradingView + Supabase + AI аналитика</p>
         </div>
         <div className="actions">
+          <button onClick={loadTrades}><Cloud size={16}/> Обновить</button>
           <button onClick={exportExcel}><Download size={16}/> Excel</button>
           <button onClick={exportPDF}><Download size={16}/> PDF</button>
-          <button><Cloud size={16}/> Cloud Sync</button>
         </div>
       </header>
 
@@ -126,6 +227,8 @@ export default function App() {
         <button onClick={login}>Войти</button>
         <span>{supabase ? 'Supabase подключен' : 'Demo mode: добавь ENV в Vercel'}</span>
       </section>
+
+      {statusMessage && <section className="authBox">{statusMessage}</section>}
 
       <section className="statsGrid">
         <Stat title="Месячный PnL" value={`$${stats.pnl}`} />
@@ -180,29 +283,37 @@ export default function App() {
             <input key={k} placeholder={k} value={newTrade[k]} onChange={e=>setNewTrade({...newTrade,[k]:e.target.value})}/>
           ))}
           <select value={newTrade.side} onChange={e=>setNewTrade({...newTrade,side:e.target.value})}>
-            <option value="long">Long</option><option value="short">Short</option><option value="buy">Buy</option><option value="sell">Sell</option>
+            <option value="long">Long</option>
+            <option value="short">Short</option>
+            <option value="buy">Buy</option>
+            <option value="sell">Sell</option>
           </select>
-          <input type="file" title="Загрузка скриншота" />
         </div>
         <textarea placeholder="Заметки, дневник эмоций, причина входа..." value={newTrade.notes} onChange={e=>setNewTrade({...newTrade,notes:e.target.value})}/>
-        <button onClick={addTrade}>Сохранить сделку</button>
+        <button onClick={addTrade}>Сохранить сделку в Supabase</button>
       </section>
 
       <section className="panel">
         <div className="tableHead">
-          <h3>Все сделки</h3>
-          <input placeholder="Фильтр по символу, сетапу, ошибке, сессии..." value={filter} onChange={e=>setFilter(e.target.value)} />
+          <h3>Все сделки {loading ? '(загрузка...)' : ''}</h3>
+          <input placeholder="Фильтр по символу, сетапу, ошибке, эмоции..." value={filter} onChange={e=>setFilter(e.target.value)} />
         </div>
         <table>
           <thead>
-            <tr><th>Символ</th><th>Сторона</th><th>PnL</th><th>RR</th><th>Сетап</th><th>Ошибка</th><th>Эмоция</th><th>AI</th></tr>
+            <tr><th>Символ</th><th>Сторона</th><th>PnL</th><th>RR</th><th>Сетап</th><th>Ошибка</th><th>Эмоция</th><th>AI</th><th></th></tr>
           </thead>
           <tbody>
-            {visibleTrades.map((t,i)=>(
-              <tr key={i}>
-                <td>{t.symbol}</td><td>{t.side}</td><td className={Number(t.pnl)>=0?'green':'red'}>{t.pnl}</td>
-                <td>{calcRR(t.entry_price,t.stop_loss,t.take_profit)}</td><td>{t.setup}</td><td>{t.mistake || '-'}</td><td>{t.emotion_before || '-'}</td>
+            {visibleTrades.map((t)=>(
+              <tr key={t.id}>
+                <td>{t.symbol}</td>
+                <td>{t.side}</td>
+                <td className={Number(t.pnl)>=0?'green':'red'}>{t.pnl}</td>
+                <td>{t.rr || calcRR(t.entry_price,t.stop_loss,t.take_profit)}</td>
+                <td>{t.setup}</td>
+                <td>{t.mistake || '-'}</td>
+                <td>{t.emotion_before || '-'}</td>
                 <td><button onClick={()=>analyzeTrade(t)}><Brain size={15}/> Анализ</button></td>
+                <td><button onClick={()=>deleteTrade(t.id)}>Удалить</button></td>
               </tr>
             ))}
           </tbody>
@@ -220,7 +331,6 @@ export default function App() {
         <h3>Webhook endpoints</h3>
         <p>TradingView alert URL: <code>/api/tradingview</code></p>
         <p>MT5 EA POST URL: <code>/api/mt5</code></p>
-        <p>Для защиты передавай <code>secret</code>, который равен переменной <code>WEBHOOK_SECRET</code>.</p>
       </section>
     </main>
   </div>
