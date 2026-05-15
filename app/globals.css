@@ -1,0 +1,21 @@
+*{box-sizing:border-box}
+body{margin:0;background:#050816;color:#fff;font-family:Inter,Segoe UI,Arial,sans-serif}
+.app{display:flex;min-height:100vh;background:radial-gradient(circle at 70% -10%,rgba(124,58,237,.18),transparent 35%),#050816}
+.sidebar{position:fixed;left:0;top:0;width:230px;height:100vh;border-right:1px solid rgba(255,255,255,.09);background:rgba(5,8,15,.86);padding:24px 18px}
+.logo{font-size:22px;font-weight:900;color:#8b5cf6;letter-spacing:.5px}.author{color:#b5bfd3;margin-top:8px;font-size:13px}
+nav{margin-top:32px;display:grid;gap:10px}nav span,nav b{display:flex;align-items:center;gap:12px;border-radius:10px;padding:13px 14px;color:#d9e2f3;font-size:14px}nav b{background:linear-gradient(135deg,#7c3aed,#9333ea)}
+main{width:100%;padding:26px 28px 50px 258px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}h1{margin:0;font-size:32px}p{color:#cbd5e1}.actions{display:flex;gap:10px}
+button{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:#fff;border-radius:10px;height:40px;padding:0 14px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+button:hover{background:rgba(124,58,237,.3)}
+.authBox,.panel,.stat{background:linear-gradient(180deg,rgba(18,23,36,.9),rgba(10,15,26,.88));border:1px solid rgba(255,255,255,.09);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.24)}
+.authBox{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:16px}.authBox input{flex:1}
+input,select,textarea{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:10px;color:#fff;padding:12px;outline:none}
+textarea{min-height:90px;width:100%;resize:vertical}
+.statsGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:14px;margin-bottom:16px}.stat{padding:18px}.stat small{color:#cbd5e1}.stat strong{display:block;font-size:24px;margin:10px 0}.stat em{font-style:normal;color:#7dd3fc;font-size:12px}
+.grid3{display:grid;grid-template-columns:1.35fr .8fr .9fr;gap:16px;margin-bottom:16px}.panel{padding:18px}.panel h3{display:flex;align-items:center;gap:9px;margin:0 0 16px}.wide{min-height:310px}
+.addTrade{margin-bottom:16px}.formGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}.addTrade button{margin-top:12px;background:#7c3aed}
+.tableHead{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:12px}.tableHead input{width:420px}
+table{width:100%;border-collapse:collapse;font-size:14px}th{text-align:left;color:#93a4bd;padding:12px;border-bottom:1px solid rgba(255,255,255,.1)}td{padding:12px;border-bottom:1px solid rgba(255,255,255,.06);color:#e5e7eb}.green{color:#34d399}.red{color:#fb7185}
+.aiBox{margin-top:16px}.aiBox b{color:#a78bfa}.webhookBox{margin-top:16px}code{background:rgba(124,58,237,.22);padding:3px 7px;border-radius:7px;color:#c4b5fd}
+@media(max-width:1200px){.sidebar{position:relative;width:100%;height:auto}.app{display:block}main{padding:22px}.statsGrid,.grid3,.formGrid{grid-template-columns:1fr}.tableHead{display:block}.tableHead input{width:100%;margin-top:10px}header{display:block}.actions{margin-top:14px;flex-wrap:wrap}}
