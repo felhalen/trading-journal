@@ -6,18 +6,6 @@ import { supabase } from '@/lib/supabaseClient'
 export default function TradesPage() {
   const [trades, setTrades] = useState([])
   const [loading, setLoading] = useState(true)
-  const [editingId, setEditingId] = useState(null)
-
-  const [editForm, setEditForm] = useState({
-    symbol: '',
-    side: 'buy',
-    pnl: '',
-    rr: '',
-    setup: '',
-    mistake: '',
-    emotion: '',
-    analysis: ''
-  })
 
   async function loadTrades() {
     setLoading(true)
@@ -27,78 +15,16 @@ export default function TradesPage() {
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (error) {
-      alert(error.message)
-      setLoading(false)
-      return
+    if (!error) {
+      setTrades(data || [])
     }
 
-    setTrades(data || [])
     setLoading(false)
-  }
-
-  function startEdit(trade) {
-    setEditingId(trade.id)
-
-    setEditForm({
-      symbol: trade.symbol || '',
-      side: trade.side || 'buy',
-      pnl: trade.pnl ?? '',
-      rr: trade.rr ?? '',
-      setup: trade.setup || '',
-      mistake: trade.mistake || '',
-      emotion: trade.emotion || '',
-      analysis: trade.analysis || ''
-    })
-  }
-
-  function cancelEdit() {
-    setEditingId(null)
-  }
-
-  async function saveEdit(tradeId) {
-    const { error } = await supabase
-      .from('trades')
-      .update({
-        symbol: editForm.symbol,
-        side: editForm.side,
-        pnl: editForm.pnl === '' ? null : Number(editForm.pnl),
-        rr: editForm.rr === '' ? null : Number(editForm.rr),
-        setup: editForm.setup,
-        mistake: editForm.mistake,
-        emotion: editForm.emotion,
-        analysis: editForm.analysis
-      })
-      .eq('id', tradeId)
-
-    if (error) {
-      alert(error.message)
-      return
-    }
-
-    setEditingId(null)
-    loadTrades()
-  }
-
-  async function deleteTrade(tradeId) {
-    const confirmed = confirm('Удалить эту сделку?')
-    if (!confirmed) return
-
-    const { error } = await supabase
-      .from('trades')
-      .delete()
-      .eq('id', tradeId)
-
-    if (error) {
-      alert(error.message)
-      return
-    }
-
-    loadTrades()
   }
 
   async function uploadScreenshot(event, tradeId) {
     const file = event.target.files?.[0]
+
     if (!file) return
 
     const fileExt = file.name.split('.').pop()
@@ -138,26 +64,8 @@ export default function TradesPage() {
     loadTrades()
   }, [])
 
-  const inputStyle = {
-    background: '#171b26',
-    color: 'white',
-    border: '1px solid #2b3242',
-    borderRadius: 8,
-    padding: '10px 12px',
-    width: '100%'
-  }
-
-  const buttonStyle = {
-    color: 'white',
-    padding: '8px 12px',
-    borderRadius: 8,
-    border: '1px solid #374151',
-    cursor: 'pointer',
-    fontWeight: 700
-  }
-
   return (
-    <div style={{ color: 'white', padding: 24 }}>
+    <div style={{ color: 'white', padding: 40 }}>
       <h1>Все сделки</h1>
 
       {loading && <p>Загрузка...</p>}
@@ -171,269 +79,68 @@ export default function TradesPage() {
         }}
       >
         <thead>
-          <tr style={{ color: '#a9c0e8', textAlign: 'left' }}>
-            <th style={{ padding: 12 }}>Символ</th>
-            <th style={{ padding: 12 }}>Сторона</th>
-            <th style={{ padding: 12 }}>PnL</th>
-            <th style={{ padding: 12 }}>RR</th>
-            <th style={{ padding: 12 }}>Сетап</th>
-            <th style={{ padding: 12 }}>Ошибка</th>
-            <th style={{ padding: 12 }}>Эмоция</th>
-            <th style={{ padding: 12 }}>Анализ</th>
-            <th style={{ padding: 12 }}>Скрин</th>
-            <th style={{ padding: 12 }}>Действие</th>
+          <tr>
+            <th>Символ</th>
+            <th>Сторона</th>
+            <th>PnL</th>
+            <th>Скрин</th>
+            <th>Действие</th>
           </tr>
         </thead>
 
         <tbody>
-          {trades.map((trade) => {
-            const isEditing = editingId === trade.id
+          {trades.map((trade) => (
+            <tr key={trade.id}>
+              <td>{trade.symbol}</td>
 
-            return (
-              <tr
-                key={trade.id}
+              <td>{trade.side}</td>
+
+              <td
                 style={{
-                  borderTop: '1px solid #1f2937'
+                  color: Number(trade.pnl) >= 0 ? '#22c55e' : '#ef4444'
                 }}
               >
-                <td style={{ padding: 12 }}>
-                  {isEditing ? (
-                    <input
-                      style={inputStyle}
-                      value={editForm.symbol}
-                      onChange={(e) =>
-                        setEditForm({
-                          ...editForm,
-                          symbol: e.target.value
-                        })
-                      }
-                    />
-                  ) : (
-                    trade.symbol
-                  )}
-                </td>
+                {trade.pnl}
+              </td>
 
-                <td style={{ padding: 12 }}>
-                  {isEditing ? (
-                    <select
-                      style={inputStyle}
-                      value={editForm.side}
-                      onChange={(e) =>
-                        setEditForm({
-                          ...editForm,
-                          side: e.target.value
-                        })
-                      }
-                    >
-                      <option value="buy">buy</option>
-                      <option value="sell">sell</option>
-                    </select>
-                  ) : (
-                    trade.side
-                  )}
-                </td>
+              <td>
+                {trade.screenshot_url ? (
+                  <a
+                    href={trade.screenshot_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ color: '#38bdf8' }}
+                  >
+                    Открыть скрин
+                  </a>
+                ) : (
+                  '-'
+                )}
+              </td>
 
-                <td
+              <td>
+                <label
                   style={{
-                    padding: 12,
-                    color: Number(trade.pnl) >= 0 ? '#22c55e' : '#ef4444'
+                    background: '#2563eb',
+                    color: 'white',
+                    padding: '8px 12px',
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                    display: 'inline-block'
                   }}
                 >
-                  {isEditing ? (
-                    <input
-                      type="number"
-                      step="0.01"
-                      style={inputStyle}
-                      value={editForm.pnl}
-                      onChange={(e) =>
-                        setEditForm({
-                          ...editForm,
-                          pnl: e.target.value
-                        })
-                      }
-                    />
-                  ) : (
-                    trade.pnl
-                  )}
-                </td>
+                  Загрузить скрин
 
-                <td style={{ padding: 12 }}>
-                  {isEditing ? (
-                    <input
-                      type="number"
-                      step="0.01"
-                      style={inputStyle}
-                      value={editForm.rr}
-                      onChange={(e) =>
-                        setEditForm({
-                          ...editForm,
-                          rr: e.target.value
-                        })
-                      }
-                    />
-                  ) : (
-                    trade.rr ?? '-'
-                  )}
-                </td>
-
-                <td style={{ padding: 12 }}>
-                  {isEditing ? (
-                    <input
-                      style={inputStyle}
-                      value={editForm.setup}
-                      onChange={(e) =>
-                        setEditForm({
-                          ...editForm,
-                          setup: e.target.value
-                        })
-                      }
-                    />
-                  ) : (
-                    trade.setup || '-'
-                  )}
-                </td>
-
-                <td style={{ padding: 12 }}>
-                  {isEditing ? (
-                    <input
-                      style={inputStyle}
-                      value={editForm.mistake}
-                      onChange={(e) =>
-                        setEditForm({
-                          ...editForm,
-                          mistake: e.target.value
-                        })
-                      }
-                    />
-                  ) : (
-                    trade.mistake || '-'
-                  )}
-                </td>
-
-                <td style={{ padding: 12 }}>
-                  {isEditing ? (
-                    <input
-                      style={inputStyle}
-                      value={editForm.emotion}
-                      onChange={(e) =>
-                        setEditForm({
-                          ...editForm,
-                          emotion: e.target.value
-                        })
-                      }
-                    />
-                  ) : (
-                    trade.emotion || '-'
-                  )}
-                </td>
-
-                <td style={{ padding: 12 }}>
-                  {isEditing ? (
-                    <textarea
-                      style={{
-                        ...inputStyle,
-                        minHeight: 70,
-                        resize: 'vertical'
-                      }}
-                      placeholder="Анализ сделки"
-                      value={editForm.analysis}
-                      onChange={(e) =>
-                        setEditForm({
-                          ...editForm,
-                          analysis: e.target.value
-                        })
-                      }
-                    />
-                  ) : (
-                    trade.analysis || '-'
-                  )}
-                </td>
-
-                <td style={{ padding: 12 }}>
-                  {trade.screenshot_url ? (
-                    <a
-                      href={trade.screenshot_url}
-                      target="_blank"
-                      style={{ color: '#38bdf8' }}
-                    >
-                      Открыть
-                    </a>
-                  ) : (
-                    '-'
-                  )}
-                </td>
-
-                <td style={{ padding: 12 }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: 8,
-                      flexWrap: 'wrap'
-                    }}
-                  >
-                    <label
-                      style={{
-                        ...buttonStyle,
-                        background: '#2563eb'
-                      }}
-                    >
-                      Скрин
-                      <input
-                        type="file"
-                        accept="image/*"
-                        hidden
-                        onChange={(e) => uploadScreenshot(e, trade.id)}
-                      />
-                    </label>
-
-                    {isEditing ? (
-                      <>
-                        <button
-                          onClick={() => saveEdit(trade.id)}
-                          style={{
-                            ...buttonStyle,
-                            background: '#16a34a'
-                          }}
-                        >
-                          Сохранить
-                        </button>
-
-                        <button
-                          onClick={cancelEdit}
-                          style={{
-                            ...buttonStyle,
-                            background: '#374151'
-                          }}
-                        >
-                          Отмена
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => startEdit(trade)}
-                        style={{
-                          ...buttonStyle,
-                          background: '#1f2937'
-                        }}
-                      >
-                        Редактировать
-                      </button>
-                    )}
-
-                    <button
-                      onClick={() => deleteTrade(trade.id)}
-                      style={{
-                        ...buttonStyle,
-                        background: '#dc2626'
-                      }}
-                    >
-                      Удалить
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            )
-          })}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={(e) => uploadScreenshot(e, trade.id)}
+                  />
+                </label>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
