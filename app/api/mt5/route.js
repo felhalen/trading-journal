@@ -32,21 +32,28 @@ export async function POST(req) {
       mt5_ticket: String(body.ticket || ''),
       symbol: body.symbol || 'UNKNOWN',
       side: String(body.type || body.side || 'unknown').toLowerCase(),
+
       entry_price: Number(body.open_price || body.entry || body.close_price || body.exit || 0),
       exit_price: Number(body.close_price || body.exit || 0),
+
+      stop_loss: Number(body.sl || body.stop_loss || 0),
+      take_profit: Number(body.tp || body.take_profit || 0),
+      lot: Number(body.lot || body.volume || 0),
+
       pnl: Number(body.profit || body.pnl || 0),
       commission: Number(body.commission || 0),
       swap: Number(body.swap || 0),
+
       status: body.status || 'closed',
-      setup: 'MT5',
+      setup: body.setup || 'MT5',
       notes: body.comment || 'MT5 trade'
     }
 
-   const { data, error } = await supabase
-   .from('trades')
-   .upsert(trade, { onConflict: 'mt5_ticket' })
-   .select()
-   .single()
+    const { data, error } = await supabase
+      .from('trades')
+      .upsert(trade, { onConflict: 'mt5_ticket' })
+      .select()
+      .single()
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
