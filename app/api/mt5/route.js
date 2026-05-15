@@ -43,10 +43,10 @@ export async function POST(req) {
     }
 
    const { data, error } = await supabase
-    .from('trades')
-    .insert(trade)
-    .select()
-    .single()
+   .from('trades')
+   .upsert(trade, { onConflict: 'mt5_ticket' })
+   .select()
+   .single()
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
