@@ -32,7 +32,7 @@ export async function POST(req) {
       mt5_ticket: String(body.ticket || ''),
       symbol: body.symbol || 'UNKNOWN',
       side: String(body.type || body.side || 'unknown').toLowerCase(),
-      entry_price: Number(body.open_price || body.entry || 0),
+      entry_price: Number(body.open_price || body.entry || body.close_price || body.exit || 0),
       exit_price: Number(body.close_price || body.exit || 0),
       pnl: Number(body.profit || body.pnl || 0),
       commission: Number(body.commission || 0),
